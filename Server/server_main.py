@@ -34,27 +34,33 @@ class SyncServer:
 
 
     async def sync_time(self, websocket):
-        await websocket.send("$REQUEST_TIME")
+            # Request time samples for averaging
+            total_ping = 0
+            total_diff = 0
+            num_samples = 20
 
-        # Get NTP server time
-        ntp_client = ntplib.NTPClient()
-        response = ntp_client.request('pool.ntp.org')
-        ntp_time = response.tx_timestamp
+            for i in range(num_samples):
+                # Send timestamp from server to client
+                server_time = datetime.now().timestamp()
+                await websocket.send("$REQUEST_TIME")
 
-        # Send NTP time to client and wait for response
-        await websocket.send(str(ntp_time))
-        print(str(ntp_time))
-        client_time = float(await websocket.recv())
-        print(str(client_time))
+                # Receive timestamp from client and calculate one-way delay
+                client_time = float(await websocket.recv())
+                one_way_delay = (datetime.now().timestamp() - server_time) / 2
 
-        # Calculate the time offset for the client
-        time_offset = client_time - ntp_time + 2208988800 # NTP vs UNIX time offset
-        self.clients[websocket]["time_offset"] = time_offset
+                # Calculate time difference and add up for averaging
+                total_diff += server_time - client_time - one_way_delay
+                
 
-        print(f"Client {websocket.remote_address} synced with time offset: {time_offset}")
+            # Calculate average time offset and save it for the client
+            average_time_offset = total_diff / num_samples
+            self.clients[websocket]["time_offset"] = average_time_offset
 
-        # send the offset timecode to the client
-        await websocket.send(f'$YOUR_OFFSET {str(time_offset)}')
+            print(f"Client {websocket.remote_address} synced with time offset: {average_time_offset}")
+
+            # Send the offset timecode to the client
+            await websocket.send(f'$YOUR_OFFSET {str(average_time_offset)}')
+
  
     async def unregister(self, websocket):
         del self.clients[websocket]
@@ -119,4 +125,4 @@ class SyncServer:
                 print("Server terminated")
 
 server = SyncServer()
-asyncio.run(server.run("localhost", 42187))
+asyncio.run(server.run("192.168.178.42", 42187))
