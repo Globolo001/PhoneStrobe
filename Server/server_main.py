@@ -34,33 +34,30 @@ class SyncServer:
 
 
     async def sync_time(self, websocket):
-            # Request time samples for averaging
-            total_ping = 0
-            total_diff = 0
-            num_samples = 20
+        # Request time samples for averaging
+        total_diff = 0
+        num_samples = 20
 
-            for i in range(num_samples):
-                # Send timestamp from server to client
-                server_time = datetime.now().timestamp()
-                await websocket.send("$REQUEST_TIME")
+        for _ in range(num_samples):
+            # Send timestamp from server to client
+            server_ts = datetime.now().timestamp()
+            await websocket.send("$REQUEST_TIME")
+            client_ts = float(await websocket.recv())
+            server_ts_ack = datetime.now().timestamp()
+            await websocket.send("$REQUEST_TIME")
+            client_ts_ack = float(await websocket.recv())
 
-                # Receive timestamp from client and calculate one-way delay
-                client_time = float(await websocket.recv())
-                one_way_delay = (datetime.now().timestamp() - server_time) / 2
+            total_diff += (server_ts_ack - server_ts) - (client_ts_ack - client_ts) / 2
+            
 
-                # Calculate time difference and add up for averaging
-                total_diff += server_time - client_time - one_way_delay
-                
+        average_time_offset = total_diff / num_samples
+        self.clients[websocket]["time_offset"] = average_time_offset
 
-            # Calculate average time offset and save it for the client
-            average_time_offset = total_diff / num_samples
-            self.clients[websocket]["time_offset"] = average_time_offset
+        print(f"Client {websocket.remote_address} synced with time offset: {average_time_offset}")
 
-            print(f"Client {websocket.remote_address} synced with time offset: {average_time_offset}")
-
-            # Send the offset timecode to the client
-            await websocket.send(f'$YOUR_OFFSET {str(average_time_offset)}')
-
+        # Send the offset timecode to the client
+        await websocket.send(f'$YOUR_OFFSET {str(average_time_offset)}')
+  
  
     async def unregister(self, websocket):
         del self.clients[websocket]
