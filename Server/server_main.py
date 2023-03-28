@@ -1,7 +1,6 @@
 import asyncio
 import websockets
 from datetime import datetime
-import ntplib
 
 class SyncServer:
     def __init__(self):
