@@ -2,17 +2,23 @@ import asyncio
 import websockets
 from datetime import datetime
 
+server_ip = "192.168.178.42"
+server_ip = "localhost"
+
+
 class SyncServer:
     def __init__(self):
         self.clients = {}
         self.main_client = None
 
     async def register(self, websocket):
+        print(f"Client {websocket.remote_address} trying to connect...")
         self.clients[websocket] = {"time_offset": None, "is_main": False}
 
         if len(self.clients) == 1:
             self.main_client = websocket
             self.clients[websocket]["is_main"] = True
+            await websocket.send("$YOU_ARE_MAIN_CLIENT")
 
         await self.sync_time(websocket)
 
@@ -40,6 +46,7 @@ class SyncServer:
         for _ in range(num_samples):
             # Send timestamp from server to client
             server_ts = datetime.now().timestamp()
+            print(f"Server timestamp: {server_ts}")
             await websocket.send("$REQUEST_TIME")
             client_ts = float(await websocket.recv())
             server_ts_ack = datetime.now().timestamp()
@@ -121,4 +128,4 @@ class SyncServer:
                 print("Server terminated")
 
 server = SyncServer()
-asyncio.run(server.run("192.168.178.42", 42187))
+asyncio.run(server.run(server_ip, 42187))

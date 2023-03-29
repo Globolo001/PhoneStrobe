@@ -1,24 +1,57 @@
 class ServerConnector {
+  constructor(serverIP, normalizedTime, eventEmitter) {
+    this.ws = this.connectWebsocket(serverIP);
+    this.ws.onmessage = this.handleMessage.bind(this);
+    this.ws.onopen = this.handleOpen.bind(this);
 
-    constructor(serverAddress, normalizedTime) {
-      this.ws = new WebSocket(serverAddress); 
-      this.ws.onmessage = this.handleMessage.bind(this);
-      this.ws.onopen = this.handleOpen.bind(this);
+    this.normalizedTime = normalizedTime;
+    this.eventEmitter = eventEmitter;
+    this.isMainClient = true;
 
-      this.normalizedTime = normalizedTime;
+    this.eventEmitter.on("sendEffectCommand", (message) => {
+      this.sendMessage(message);
+    });
+  }
+
+  connectWebsocket(ip, port = 42187) {
+    var wssadress = "wss://" + ip + ":" + port;
+    var wsadress = "ws://" + ip + ":" + port;
+  
+    var websocket;
+    try {
+      console.log("Trying to connect with wss", wssadress);
+      websocket = new WebSocket(wssadress);
+    } catch (e) {
+      console.log("Error connecting with wss:", e);
+    }
+    
+    if (!websocket || websocket.readyState !== 1) {
+      try {
+        console.log("Trying to connect with ws", wsadress);
+        websocket = new WebSocket(wsadress);
+      } catch (e) {
+        console.log("Error connecting with ws:", e);
+      }
     }
   
-    handleMessage(event) {
-      const message = event.data;
-      console.log(`Received message: ${message}`);
+    return websocket;
+  }
   
-      if (message.startsWith("$EXEC_EFCT")) {
-        this.eventEmitter.emit("effect", message);
-      }
+  
+  handleMessage(event) {
+    const message = event.data;
+    console.log(`Received message: ${message}`);
+
+    if (message.startsWith("$EXEC_EFCT")) {
+      this.eventEmitter.emit("receiveEffectCommand", message);
+    }
   
       if (message.startsWith("$REQUEST_TIME")) {
-        const localTime = Date.now() / 1000;
-        this.ws.send(localTime);
+        this.sendMessage(Date.now() / 1000);
+      }
+
+      if(message.startsWith("$YOU_ARE_MAIN_CLIENT")){
+        this.isMainClient = true;
       }
   
       if (message.startsWith("$YOUR_OFFSET")) {
@@ -26,37 +59,18 @@ class ServerConnector {
         this.normalizedTime.setOffset(clientOffset);
       }
     }
-
-    handleEffectCommand(message) {
-      //This must be passed to main class (EffectServer) and from there passed to EffectQueue
-    }
   
     handleOpen(event) {
-      console.log("WebSocket opened");
+      console.log("WebSocket opened: " + event);
     }
 
     sendSyncTimeCommand() {
-      const message = "$SYNC_TIME";
+      this.sendMessage("$SYNC_TIME");
+    }
+
+    sendMessage(message) {
       console.log(`Sending message: ${message}`);
       this.ws.send(message);
-    }
-  
-    // Effects need access
-    
-    
-    // To be externalized to main client file
-    sendEffectCommand(effectList, repeat = 1, startTime = 1, delay = 0.5) {
-      if (typeof effectList === "string") {
-        effectList = [effectList];
-      }
-  
-      const timeOfExecution = this.getNormalizedTime();
-  
-      for (let i = 0; i < repeat * effectList.length; i++) {
-        const message = `$EFCT ${effectList[i % effectList.length]} ${timeOfExecution + startTime + i * delay}`;
-        console.log(`Sending message: ${message}`);
-        this.ws.send(message);
-      }
     }
   }
   

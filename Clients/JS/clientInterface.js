@@ -1,6 +1,6 @@
 
 // Initialize WebSocket connection
-const ws = new WebSocket("ws://192.168.178.42:42187");
+const ws = new WebSocket("ws://localhost:42187");
 
 // Queue of effects to execute
 const effectQueue = [];
@@ -57,7 +57,7 @@ setInterval(() => {
         if (effect == "strobeOn") {
             strobeOn();
         } else if (effect == "strobeOff") {
-            document.body.style.background = "white";
+            strobeOff();
         }
 
         console.log(effectQueue);
@@ -94,4 +94,14 @@ function sendSyncTimeCommand() {
 
 function getNormalizedTime() {
     return Date.now() / 1000 + parseFloat(localStorage.getItem("timeOffset"));
+}
+
+function strobeOn() {
+    // Throw error that this method is not implemented copilot?
+    document.body.style.background = "white";
+}
+
+function strobeOff() {
+    // Implementation of strobeOn method
+    document.body.style.background = "black";
 }

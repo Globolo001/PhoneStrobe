@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sync Client</title>
+  </head>
+  <body>
+    <button onclick="sendEffectCommand('strobeOn')">Strobe On</button>
+    <button onclick="sendEffectCommand('strobeOff')">Strobe Off</button>
+    <button onclick="sendEffectCommand(['strobeOn', 'strobeOff'], 15, 2, 0.1)">Auto Strobe</button>
+    <button onclick="sendSyncTimeCommand()">Sync Time</button>
+
+    <h1>
+      <span id="time"></span>
+    </h1>
+    
+    <!-- include your JavaScript files here -->
+    <script src="EventEmitter.js"></script>
+    <script src="NormalizedTime.js"></script>
+    <script src="ServerConnector.js"></script>
+    <script src="Effect.js"></script>
+    <script src="EffectsQueue.js"></script>
+    <script src="MainClient.js"></script>
+    <script src="ClientSuperClass.js"></script>
+
+    <!-- HTML custom -->
+
+    <script src="HtmlEffectClient.js"></script>
+
+  </body>
+</html>
