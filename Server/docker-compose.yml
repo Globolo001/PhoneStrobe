@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  strobe-server:
+    image: winters-visual-sync-server
+    ports:
+      - "42187:42187"
+    volumes:
+    # Mount to the ssl folder in the container
+      - /etc/letsencrypt/ssl/csr:/app/ssl/csr
+      - /etc/letsencrypt/ssl/keys:/app/ssl/keys
+    environment:
+    # Filename relative to the mounted ssl location
+      - CERT_FILENAME=csr/0000_csr-certbot.pem
+      - KEY_FILENAME=keys/0000_key-certbot.pem
