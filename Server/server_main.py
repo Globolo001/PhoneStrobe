@@ -117,9 +117,9 @@ class SyncServer:
 
     async def run(self, host, port):
         ssl_context = None
-        if 'CERT_FILE' in os.environ and 'KEY_FILE' in os.environ:
-            cert_file = os.environ['CERT_FILE']
-            key_file = os.environ['KEY_FILE']
+        if 'CERTFILE' in os.environ and 'KEYFILE' in os.environ:
+            cert_file = os.environ['CERTFILE']
+            key_file = os.environ['KEYFILE']
             if os.path.exists(cert_file) and os.path.exists(key_file):
                 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
                 ssl_context.load_cert_chain(cert_file, key_file)
