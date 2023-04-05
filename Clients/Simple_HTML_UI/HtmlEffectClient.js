@@ -1,6 +1,6 @@
 import VisualSuperClient from "../CLIENT_MODULE/VisualSuperClient.js";
 
-const clientInstance = new VisualSuperClient("localhost");
+const clientInstance = new VisualSuperClient("kleukerstinkt.me");
 
 clientInstance.addPossibleEffect("strobeOn", () => {
     document.body.style.background = "black";

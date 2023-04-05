@@ -12,4 +12,4 @@ ENV CERTFILE="/app/ssl/${CERT_FILENAME}"
 ENV KEYFILE="/app/ssl/${KEY_FILENAME}"
 
 
-CMD ["python", "server_main.py"]
+CMD ["python", "server_main.py", "> /app/log.txt"]

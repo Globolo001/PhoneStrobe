@@ -92,7 +92,6 @@ class MainClient {
         this.possibleEffects = possibleEffects;
     }
 
-    // To be externalized to main client file
     sendEffectCommand(effectList, repeat = 1, startTime = 1, delay = 0.5) {
         if (typeof effectList === "string") {
           effectList = [effectList];
@@ -107,7 +106,7 @@ class MainClient {
                 const message = `$EFCT ${effectList[i % effectList.length]} ${timeOfExecution + startTime + i * delay}`;
                 this.eventEmitter.emit("sendEffectCommand", message);
             } else {
-                console.log(`Effect ${effectList[i % effectList.length]} is not a possible effect.`);
+                console.log(`MainClientError: Effect ${effectList[i % effectList.length]} is not a possible effect to send.`);
             }
         }
       }
@@ -241,7 +240,7 @@ class VisualSuperClient{
       }
 }
 
-const clientInstance = new VisualSuperClient("localhost");
+const clientInstance = new VisualSuperClient("kleukerstinkt.me");
 
 clientInstance.addPossibleEffect("strobeOn", () => {
     document.body.style.background = "black";
@@ -250,14 +249,3 @@ clientInstance.addPossibleEffect("strobeOn", () => {
 clientInstance.addPossibleEffect("strobeOff", () => {
     document.body.style.background = "white";
 });
-
-function sendEffectCommand(effectList, repeat = 1, startTime = 1, delay = 0.5) {
-    clientInstance.sendEffectCommand(effectList, repeat, startTime, delay);
-}
-
-function sendSyncTimeCommand() {
-    clientInstance.sendSyncTimeCommand();
-}
-
-sendEffectCommand("test");
-sendSyncTimeCommand();

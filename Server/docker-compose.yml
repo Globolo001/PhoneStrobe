@@ -2,7 +2,7 @@ version: '3'
 
 services:
   strobe-server:
-    image: winters-visual-sync-server
+    image: osowin/winters-visual-sync
     ports:
       - "42187:42187"
     volumes:
