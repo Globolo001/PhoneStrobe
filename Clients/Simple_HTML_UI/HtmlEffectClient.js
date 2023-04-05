@@ -1,4 +1,6 @@
-const clientInstance = new ClientSuperClass("localhost");
+import VisualSuperClient from "../CLIENT_MODULE/VisualSuperClient.js";
+
+const clientInstance = new VisualSuperClient("localhost");
 
 clientInstance.addPossibleEffect("strobeOn", () => {
     document.body.style.background = "black";
@@ -15,3 +17,6 @@ function sendEffectCommand(effectList, repeat = 1, startTime = 1, delay = 0.5) {
 function sendSyncTimeCommand() {
     clientInstance.sendSyncTimeCommand();
 }
+
+sendEffectCommand; // To keep them in the file
+sendSyncTimeCommand;

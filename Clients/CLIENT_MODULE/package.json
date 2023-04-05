@@ -1,0 +1,19 @@
+{
+  "name": "winters-visual-sync",
+  "version": "0.1.0",
+  "description": "A node js client for syncing multiple clients based on a main client via a server architecure",
+  "main": "ClientSuperClass.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Globolo001/PhoneStrobe.git"
+  },
+  "author": "Globolo001",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Globolo001/PhoneStrobe/issues"
+  },
+  "homepage": "https://github.com/Globolo001/PhoneStrobe#readme"
+}

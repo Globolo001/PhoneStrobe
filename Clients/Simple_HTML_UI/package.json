@@ -1,0 +1,15 @@
+{
+  "name": "simple_html_ui",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "HtmlEffectClient.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "rollup": "^3.20.2"
+  }
+}

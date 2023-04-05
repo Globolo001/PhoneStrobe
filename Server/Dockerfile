@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY server_main.py .
 
-ENV CERTFILE="/app/fullchain.pem"
-ENV KEYFILE="/app/privkey.pem"
+ENV CERTFILE="/app/ssl/fullchain.pem"
+ENV KEYFILE="/app/ssl/privkey.pem"
 
 CMD ["python", "server_main.py"]

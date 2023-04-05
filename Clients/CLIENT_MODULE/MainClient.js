@@ -1,4 +1,4 @@
-class MainClient {
+export class MainClient {
 
     constructor(normalizedTime, eventEmitter, possibleEffects) {
         this.normalizedTime = normalizedTime;
@@ -6,7 +6,6 @@ class MainClient {
         this.possibleEffects = possibleEffects;
     }
 
-    // To be externalized to main client file
     sendEffectCommand(effectList, repeat = 1, startTime = 1, delay = 0.5) {
         if (typeof effectList === "string") {
           effectList = [effectList];
@@ -21,7 +20,7 @@ class MainClient {
                 const message = `$EFCT ${effectList[i % effectList.length]} ${timeOfExecution + startTime + i * delay}`;
                 this.eventEmitter.emit("sendEffectCommand", message);
             } else {
-                console.log(`Effect ${effectList[i % effectList.length]} is not a possible effect.`);
+                console.log(`MainClientError: Effect ${effectList[i % effectList.length]} is not a possible effect to send.`);
             }
         }
       }

@@ -1,10 +1,8 @@
 import asyncio
 import websockets
+import ssl
 from datetime import datetime
-
-server_ip = "192.168.178.42"
-server_ip = "localhost"
-
+import os
 
 class SyncServer:
     def __init__(self):
@@ -46,7 +44,6 @@ class SyncServer:
         for _ in range(num_samples):
             # Send timestamp from server to client
             server_ts = datetime.now().timestamp()
-            print(f"Server timestamp: {server_ts}")
             await websocket.send("$REQUEST_TIME")
             client_ts = float(await websocket.recv())
             server_ts_ack = datetime.now().timestamp()
@@ -119,13 +116,29 @@ class SyncServer:
                 del self.clients[client]
 
     async def run(self, host, port):
-        async with websockets.serve(self.register, host, port):
-            print(f"Sync server started on {host}:{port}")
+        ssl_context = None
+        if 'CERT_FILE' in os.environ and 'KEY_FILE' in os.environ:
+            cert_file = os.environ['CERT_FILE']
+            key_file = os.environ['KEY_FILE']
+            if os.path.exists(cert_file) and os.path.exists(key_file):
+                ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+                ssl_context.load_cert_chain(cert_file, key_file)
+            else:
+                print('Could not find certificate or key file. Starting without SSL support.')
+
+        async with websockets.serve(
+            self.register, host, port, ssl=ssl_context
+        ):
+            if ssl_context:
+                print(f"Secure server started on {host}:{port}")
+            else:
+                print(f"Insecure server started on {host}:{port}")
 
             try:
                 await asyncio.Future()  # Run forever
             except KeyboardInterrupt:
                 print("Server terminated")
 
+
 server = SyncServer()
-asyncio.run(server.run(server_ip, 42187))
+asyncio.run(server.run("0.0.0.0", 42187))

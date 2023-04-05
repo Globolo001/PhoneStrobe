@@ -1,6 +1,6 @@
-class ServerConnector {
-  constructor(serverIP, normalizedTime, eventEmitter) {
-    this.ws = this.connectWebsocket(serverIP);
+export class ServerConnector {
+  constructor(serverIP, port, normalizedTime, eventEmitter) {
+    this.ws = this.connectWebsocket(serverIP, port);
     this.ws.onmessage = this.handleMessage.bind(this);
     this.ws.onopen = this.handleOpen.bind(this);
 

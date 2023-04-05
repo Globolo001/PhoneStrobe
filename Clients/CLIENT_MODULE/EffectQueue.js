@@ -1,5 +1,5 @@
 
-class EffectQueue{
+export class EffectQueue{
 
     constructor(normalizedTime, eventEmitter, possibleEffects){
         this.effectQueue = [];

@@ -1,4 +1,4 @@
-class NormalizedTime {
+export class NormalizedTime {
     getNormalizedTime() {
         return Date.now() / 1000 + parseFloat(localStorage.getItem("timeOffset"));
       }
