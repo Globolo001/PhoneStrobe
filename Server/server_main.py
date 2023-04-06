@@ -3,6 +3,7 @@ import websockets
 import ssl
 from datetime import datetime
 import os
+import argparse
 
 class SyncServer:
     def __init__(self):
@@ -35,7 +36,6 @@ class SyncServer:
             await asyncio.sleep(1)
             raise KeyboardInterrupt
 
-
     async def sync_time(self, websocket):
         # Request time samples for averaging
         total_diff = 0
@@ -61,7 +61,6 @@ class SyncServer:
         # Send the offset timecode to the client
         await websocket.send(f'$YOUR_OFFSET {str(average_time_offset)}')
   
- 
     async def unregister(self, websocket):
         del self.clients[websocket]
         print(f"Client {websocket.remote_address} disconnected")
@@ -140,5 +139,14 @@ class SyncServer:
                 print("Server terminated")
 
 
-server = SyncServer()
-asyncio.run(server.run("0.0.0.0", 42187))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--port', type=int, default=42187,
+                        help='the port to listen on')
+    args = parser.parse_args()  
+
+    server = SyncServer()
+    asyncio.run(server.run("0.0.0.0", args.port))
+
+if __name__ == '__main__':
+    main()

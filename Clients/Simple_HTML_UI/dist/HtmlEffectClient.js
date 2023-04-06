@@ -1,9 +1,5 @@
 class ServerConnector {
   constructor(serverIP, port, normalizedTime, eventEmitter) {
-    this.ws = this.connectWebsocket(serverIP, port);
-    this.ws.onmessage = this.handleMessage.bind(this);
-    this.ws.onopen = this.handleOpen.bind(this);
-
     this.normalizedTime = normalizedTime;
     this.eventEmitter = eventEmitter;
     this.isMainClient = true;
@@ -11,33 +7,45 @@ class ServerConnector {
     this.eventEmitter.on("sendEffectCommand", (message) => {
       this.sendMessage(message);
     });
+
+    this.connectWebsocket(serverIP, port);
+  }
+
+  bindWebsocketEvents() {
+    this.ws.onmessage = this.handleMessage.bind(this);
+    this.ws.onopen = this.handleOpen.bind(this);
   }
 
   connectWebsocket(ip, port = 42187) {
-    var wssadress = "wss://" + ip + ":" + port;
-    var wsadress = "ws://" + ip + ":" + port;
-  
-    var websocket;
-    try {
-      console.log("Trying to connect with wss", wssadress);
-      websocket = new WebSocket(wssadress);
-    } catch (e) {
+    const wssAddress = "wss://" + ip + ":" + port;
+    const wsAddress = "ws://" + ip + ":" + port;
+
+    console.log("Trying to connect with wss", wssAddress);
+    this.ws = new WebSocket(wssAddress);
+
+    this.ws.addEventListener("error", (e) => {
       console.log("Error connecting with wss:", e);
-    }
-    
-    if (!websocket || websocket.readyState !== 1) {
-      try {
-        console.log("Trying to connect with ws", wsadress);
-        websocket = new WebSocket(wsadress);
-      } catch (e) {
+      console.log("Trying to connect with ws", wsAddress);
+      const ws = new WebSocket(wsAddress);
+
+      ws.addEventListener("error", (e) => {
         console.log("Error connecting with ws:", e);
-      }
-    }
-  
-    return websocket;
+      });
+
+      ws.addEventListener("open", () => {
+        console.log("Connected successfully with WS (no SSL)");
+        this.ws = ws;
+        this.bindWebsocketEvents();
+      });
+    });
+
+    this.ws.addEventListener("open", () => {
+      console.log("Connected successfully with WSS (SSL/TLS)");
+      this.bindWebsocketEvents();
+    });
   }
-  
-  
+
+
   handleMessage(event) {
     const message = event.data;
     console.log(`Received message: ${message}`);
@@ -45,34 +53,34 @@ class ServerConnector {
     if (message.startsWith("$EXEC_EFCT")) {
       this.eventEmitter.emit("receiveEffectCommand", message);
     }
-  
-      if (message.startsWith("$REQUEST_TIME")) {
-        this.sendMessage(Date.now() / 1000);
-      }
 
-      if(message.startsWith("$YOU_ARE_MAIN_CLIENT")){
-        this.isMainClient = true;
-      }
-  
-      if (message.startsWith("$YOUR_OFFSET")) {
-        const clientOffset = parseFloat(message.split(" ")[1]);
-        this.normalizedTime.setOffset(clientOffset);
-      }
-    }
-  
-    handleOpen(event) {
-      console.log("WebSocket opened: " + event);
+    if (message.startsWith("$REQUEST_TIME")) {
+      this.sendMessage(Date.now() / 1000);
     }
 
-    sendSyncTimeCommand() {
-      this.sendMessage("$SYNC_TIME");
+    if (message.startsWith("$YOU_ARE_MAIN_CLIENT")) {
+      this.isMainClient = true;
     }
 
-    sendMessage(message) {
-      console.log(`Sending message: ${message}`);
-      this.ws.send(message);
+    if (message.startsWith("$YOUR_OFFSET")) {
+      const clientOffset = parseFloat(message.split(" ")[1]);
+      this.normalizedTime.setOffset(clientOffset);
     }
   }
+
+  handleOpen(event) {
+    console.log("WebSocket opened: " + event);
+  }
+
+  sendSyncTimeCommand() {
+    this.sendMessage("$SYNC_TIME");
+  }
+
+  sendMessage(message) {
+    console.log(`Sending message: ${message}`);
+    this.ws.send(message);
+  }
+}
 
 class NormalizedTime {
     getNormalizedTime() {
@@ -240,7 +248,7 @@ class VisualSuperClient{
       }
 }
 
-const clientInstance = new VisualSuperClient("kleukerstinkt.me");
+const clientInstance = new VisualSuperClient("localhost");
 
 clientInstance.addPossibleEffect("strobeOn", () => {
     document.body.style.background = "black";
@@ -249,3 +257,14 @@ clientInstance.addPossibleEffect("strobeOn", () => {
 clientInstance.addPossibleEffect("strobeOff", () => {
     document.body.style.background = "white";
 });
+
+function sendEffectCommand(effectList, repeat = 1, startTime = 1, delay = 0.5) {
+    clientInstance.sendEffectCommand(effectList, repeat, startTime, delay);
+}
+
+function sendSyncTimeCommand() {
+    clientInstance.sendSyncTimeCommand();
+}
+
+sendEffectCommand(); // To keep them in the file
+sendSyncTimeCommand();

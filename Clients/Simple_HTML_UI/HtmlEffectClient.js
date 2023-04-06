@@ -1,6 +1,6 @@
 import VisualSuperClient from "../CLIENT_MODULE/VisualSuperClient.js";
 
-const clientInstance = new VisualSuperClient("kleukerstinkt.me");
+const clientInstance = new VisualSuperClient("localhost");
 
 clientInstance.addPossibleEffect("strobeOn", () => {
     document.body.style.background = "black";
@@ -18,5 +18,5 @@ function sendSyncTimeCommand() {
     clientInstance.sendSyncTimeCommand();
 }
 
-sendEffectCommand; // To keep them in the file
-sendSyncTimeCommand;
+sendEffectCommand(); // To keep them in the file
+sendSyncTimeCommand();
